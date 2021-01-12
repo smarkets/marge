@@ -78,6 +78,10 @@ class Project(gitlab.Resource):
         return self.info['ssh_url_to_repo']
 
     @property
+    def http_url_to_repo(self):
+        return self.info['http_url_to_repo']
+
+    @property
     def merge_requests_enabled(self):
         return self.info['merge_requests_enabled']
 

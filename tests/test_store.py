@@ -18,7 +18,7 @@ class TestRepoManager:
     def setup_method(self, _method):
         user = marge.user.User(api=None, info=dict(USER_INFO, name='Peter Parker', email='pparker@bugle.com'))
         self.root_dir = tempfile.TemporaryDirectory()
-        self.repo_manager = marge.store.RepoManager(
+        self.repo_manager = marge.store.SshRepoManager(
             user=user, root_dir=self.root_dir.name, ssh_key_file='/ssh/key',
         )
 
