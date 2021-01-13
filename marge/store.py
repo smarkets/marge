@@ -63,11 +63,13 @@ class HttpsRepoManager:
         if not repo or repo.remote_url != project.http_url_to_repo:
             credentials = "oauth2:" + self._auth_token
             # insert token auth "oauth2:<auth_token>@"
-            repo_url = re.sub("(?P<protocol>http(s)?://)", "\g<protocol>" + credentials + "@", project.http_url_to_repo, 1)
+            pattern = "(http(s)?://)"
+            replacement = r"\1" + credentials + "@"
+            repo_url = re.sub(pattern, replacement, project.http_url_to_repo, 1)
             local_repo_dir = tempfile.mkdtemp(dir=self._root_dir)
 
             repo = git.Repo(repo_url, local_repo_dir, ssh_key_file=None,
-                               timeout=self._timeout, reference=self._reference)
+                            timeout=self._timeout, reference=self._reference)
             repo.clone()
             repo.config_user_info(
                 user_email=self._user.email,
