@@ -31,9 +31,10 @@ in
         busybox
         gitMinimal
         openssh
+        cacert
       ] ++ [ marge ];
     config = {
       Entrypoint = [ "/bin/marge.app" ];
-      Env = ["LANG=en_US.UTF-8" ''LOCALE_ARCHIVE=/lib/locale/locale-archive''];
+      Env = ["LANG=en_US.UTF-8" ''LOCALE_ARCHIVE=/lib/locale/locale-archive'' "GIT_SSL_CAINFO=/etc/ssl/certs/ca-bundle.crt" "SSL_CERT_FILE=/etc/ssl/certs/ca-bundle.crt"];
     };
   }
