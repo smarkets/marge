@@ -81,7 +81,7 @@ def _parse_config(args):
         '--use-https',
         env_var='MARGE_USE_HTTPS',
         action='store_true',
-        help='use HTTPS instead of SSH for GIT repository access\n',
+        help='use HTTP(S) instead of SSH for GIT repository access\n',
     )
     repo_access.add_argument(
         '--ssh-key',
