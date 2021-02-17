@@ -343,7 +343,7 @@ class MergeJob:
             # and likely explains any previous failure, so it will better to just
             # raise a GitError
             if source_branch != 'master':
-                repo.checkout_branch('master')
+                repo.checkout_branch('HEAD^')
                 repo.remove_branch(source_branch)
 
             if not branch_update_done:
