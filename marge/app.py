@@ -76,7 +76,7 @@ def _parse_config(args):
         metavar='URL',
         help='Your GitLab instance, e.g. "https://gitlab.example.com".\n',
     )
-    ssh_key_group = parser.add_mutually_exclusive_group(required=True)
+    ssh_key_group = parser.add_mutually_exclusive_group(required=False)
     ssh_key_group.add_argument(
         '--ssh-key',
         type=str,
@@ -89,8 +89,9 @@ def _parse_config(args):
     )
     ssh_key_group.add_argument(
         '--ssh-key-file',
-        type=str,  # because we want a file location, not the content
+        # type=str,  # because we want a file location, not the content
         metavar='FILE',
+        default='marge-bot-ssh-key', # give it a default to stop complaining
         help='Path to the private ssh key for marge so it can clone/push.\n',
     )
     parser.add_argument(
@@ -245,9 +246,9 @@ def _parse_config(args):
     # pylint: disable=protected-access
     for _, (_, value) in parser._source_to_settings.get(configargparse._COMMAND_LINE_SOURCE_KEY, {}).items():
         cli_args.extend(value)
-    for bad_arg in ['--auth-token', '--ssh-key']:
-        if bad_arg in cli_args:
-            raise MargeBotCliArgError('"%s" can only be set via ENV var or config file.' % bad_arg)
+    # for bad_arg in ['--auth-token', '--ssh-key']:
+    #     if bad_arg in cli_args:
+    #         raise MargeBotCliArgError('"%s" can only be set via ENV var or config file.' % bad_arg)
     return config
 
 
@@ -306,6 +307,7 @@ def main(args=None):
 
         config = bot.BotConfig(
             user=user,
+            auth_token=auth_token,
             ssh_key_file=ssh_key_file,
             project_regexp=options.project_regexp,
             git_timeout=options.git_timeout,

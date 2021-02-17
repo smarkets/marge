@@ -34,6 +34,7 @@ class Bot:
         with TemporaryDirectory() as root_dir:
             repo_manager = store.RepoManager(
                 user=self.user,
+                auth_token=self._config.auth_token,
                 root_dir=root_dir,
                 ssh_key_file=self._config.ssh_key_file,
                 timeout=self._config.git_timeout,
@@ -186,7 +187,7 @@ class Bot:
 
 
 class BotConfig(namedtuple('BotConfig',
-                           'user ssh_key_file project_regexp merge_order merge_opts git_timeout ' +
+                           'user auth_token ssh_key_file project_regexp merge_order merge_opts git_timeout ' +
                            'git_reference_repo branch_regexp source_branch_regexp batch')):
     pass
 
