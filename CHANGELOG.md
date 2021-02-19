@@ -1,3 +1,6 @@
+  * 0.9.5:
+    - Feature: Add new choice `assigned_at` to option `merge_order` #268
+    - Fix: Wait for merge status to resolve #265
   * 0.9.4:
     - Fix: handle `CannotMerge` which could be raised from `update_merge_request` #275
     - Fix: maintain `batch_mr_sha` value when batch merging with fast forward commits #276
