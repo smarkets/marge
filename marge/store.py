@@ -1,18 +1,35 @@
-import tempfile
 import re
+import tempfile
 
 from . import git
 
 
-class SshRepoManager:
+class RepoManager:
 
-    def __init__(self, user, root_dir, ssh_key_file=None, timeout=None, reference=None):
+    def __init__(self, user, root_dir, timeout=None, reference=None):
         self._root_dir = root_dir
         self._user = user
-        self._ssh_key_file = ssh_key_file
         self._repos = {}
         self._timeout = timeout
         self._reference = reference
+
+    def forget_repo(self, project):
+        self._repos.pop(project.id, None)
+
+    @property
+    def user(self):
+        return self._user
+
+    @property
+    def root_dir(self):
+        return self._root_dir
+
+
+class SshRepoManager(RepoManager):
+
+    def __init__(self, user, root_dir, ssh_key_file=None, timeout=None, reference=None):
+        super().__init__(user, root_dir, timeout, reference)
+        self._ssh_key_file = ssh_key_file
 
     def repo_for_project(self, project):
         repo = self._repos.get(project.id)
@@ -32,31 +49,16 @@ class SshRepoManager:
 
         return repo
 
-    def forget_repo(self, project):
-        self._repos.pop(project.id, None)
-
-    @property
-    def user(self):
-        return self._user
-
-    @property
-    def root_dir(self):
-        return self._root_dir
-
     @property
     def ssh_key_file(self):
         return self._ssh_key_file
 
 
-class HttpsRepoManager:
+class HttpsRepoManager(RepoManager):
 
     def __init__(self, user, root_dir, auth_token=None, timeout=None, reference=None):
-        self._root_dir = root_dir
-        self._user = user
+        super().__init__(user, root_dir, timeout, reference)
         self._auth_token = auth_token
-        self._repos = {}
-        self._timeout = timeout
-        self._reference = reference
 
     def repo_for_project(self, project):
         repo = self._repos.get(project.id)
@@ -79,17 +81,6 @@ class HttpsRepoManager:
             self._repos[project.id] = repo
 
         return repo
-
-    def forget_repo(self, project):
-        self._repos.pop(project.id, None)
-
-    @property
-    def user(self):
-        return self._user
-
-    @property
-    def root_dir(self):
-        return self._root_dir
 
     @property
     def auth_token(self):
