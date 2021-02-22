@@ -2,10 +2,3 @@ ConfigArgParse
 maya
 PyYAML
 requests
-
-# testing
-pytest
-pytest-cov
-pytest-flake8
-pytest-pylint
-pytest-runner

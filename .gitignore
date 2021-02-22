@@ -4,10 +4,9 @@ ENV/
 *.egg-info
 .coverage
 .pytest_cache
-
-# nix stuff
-result
-result-*
+/MANIFEST
+/build/
+/dist/
 
 # Editor
 *.sw[po]

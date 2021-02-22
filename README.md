@@ -341,19 +341,8 @@ run:
 
 ### Running marge-bot as a plain python app
 
-#### Installing marge-bot with nix
-
-Alternatively, if you prefer not to use docker, you can also directly run marge.
-If you use [nix](https://nixos.org/nix/) do `nix-env --install -f default.nix`.
-
-The nix install should be fully reproducible on any version of linux (and also
-work on OS X, although this is not something we properly test). If you don't
-want to use docker we recommend you give nix a try.
-
-#### Installing marge-bot the old-fashioned way
-
-Finally, although this is our least preferred alternative, you can always do
-`python3 setup.py install` (note that you will need python3.6).
+You need to install the requirements first `pip install -r requirements_frozen.txt`,
+and then install Marge itself `python3 setup.py install` (note that you will need python3.6+).
 
 Afterwards, the minimal way to run marge is as follows.
 

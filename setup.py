@@ -7,4 +7,5 @@ setup(
     license='BSD3',
     packages=['marge'],
     scripts=['marge.app'],
+    data_files=[('.', ['version'])],
 )

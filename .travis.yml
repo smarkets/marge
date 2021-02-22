@@ -1,7 +1,14 @@
 sudo: required
 services:
 - docker
-language: nix
+language: python
+python:
+  - "3.6"
+  - "3.7"
+  - "3.8"
+  - "3.9"
+install: pip install -r requirements_plus_development_frozen.txt
+script: pytest
 deploy:
   provider: script
   script: make dockerize && make docker-push VERSION="$TRAVIS_BRANCH"
