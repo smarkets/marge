@@ -253,7 +253,34 @@ may contain bugs.
 You can also specify a particular version as a tag, e.g.
 `smarkets/marge-bot:0.7.0`.
 
-### Running marge-bot in kubernetes
+### Running marge-bot in kubernetes via ***helm***
+
+#### Inline 
+```bash
+$ helm repo add zhilyaev-marge 'https://raw.githubusercontent.com/zhilyaev/marge-bot-helm/master'
+$ helm install <RELEASE_NAME> zhilyaev-marge/marge-bot \
+ --set "env[0].name=MARGE_GITLAB_URL" --set "env[0].value=<GITLAB_URL>" \
+ --set "env[0].name=MARGE_AUTH_TOKEN" --set "env[0].value=<GITLAB_AUTH_TOKEN>" \
+ --set "env[0].name=MARGE_SSH_KEY"    --set "env[0].value=$(cat ssh-key)"
+```
+
+#### With values file
+
+```bash
+$ cat my.values
+env:
+  - name: MARGE_GITLAB_URL
+    value: https://gitlab.com
+  - name: MARGE_AUTH_TOKEN
+    value: asdfsdkafjkdaf
+  - name: MARGE_SSH_KEY
+    value: |-
+      -----BEGIN RSA PRIVATE KEY-----
+$ helm install <RELEASE_NAME> zhilyaev-marge/marge-bot -f my.values
+```
+
+
+### Running marge-bot in kubernetes via ***ktmpl***
 It's also possible to run marge in kubernetes, e.g. here's how you use a ktmpl
 template:
 
