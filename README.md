@@ -25,7 +25,7 @@ this is only to be found out when the commits have already landed.
 GitLab (in their [enterprise edition](https://about.gitlab.com/products/)),
 offers an important improvement here with
 their
-[semi-linear history and fast-forward](https://docs.gitlab.com/ee/user/project/merge_requests/) merge
+[semi-linear history and fast-forward](https://docs.gitlab.com/ee/user/project/merge_requests/#semi-linear-history-merge-requests) merge
 request methods: in both cases a merge request can only be accepted if the
 resulting master branch will be effectively the same as the merge request branch
 on which CI has passed. If master has changed since the tests were last ran, it
@@ -192,6 +192,8 @@ marge-bot user via the admin UI to get the private token, it should then be at
 Once you have the token, put it in a file, e.g. `marge-bot.token`.
 
 Finally, create a new ssh key-pair, e.g like so
+
+Margebot also requires the [Only allow merge requests to be merged if the pipeline succeeds](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html#only-allow-merge-requests-to-be-merged-if-the-pipeline-succeeds) setting to be enabled.
 
 ```bash
 ssh-keygen -t ed25519 -C marge-bot@invalid -f marge-bot-ssh-key -P ''
