@@ -193,6 +193,13 @@ class Api(gitlab.Api):
             sudo, from_state, to_state,
         )
 
+    def list_notes(self, merge_request, note, sudo=None, from_state=None, to_state=None):
+        self.add_transition(
+            GET('/projects/{0.project_id}/merge_requests/{0.iid}/notes?sort=desc&order_by=created_at'.format(attrs(merge_request))),
+            List(r'/projects/\d+/merge_requests/\d+/notes/\d+$', self),
+            sudo, from_state, to_state,
+        )
+
     def expected_note(self, merge_request, note, sudo=None, from_state=None, to_state=None):
         self.add_transition(
             POST(

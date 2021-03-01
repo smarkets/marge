@@ -157,14 +157,24 @@ class MergeRequest(gitlab.Resource):
     def refetch_info(self):
         self._info = self._api.call(GET('/projects/{0.project_id}/merge_requests/{0.iid}'.format(self)))
 
-    def comment(self, message):
-        if self._api.version().release >= (9, 2, 2):
-            notes_url = '/projects/{0.project_id}/merge_requests/{0.iid}/notes'.format(self)
-        else:
-            # GitLab botched the v4 api before 9.2.2
-            notes_url = '/projects/{0.project_id}/merge_requests/{0.id}/notes'.format(self)
+    def refetch_notes(self):
+        self._notes = self._api.call(GET('/projects/{0.project_id}/merge_requests/{0.iid}/notes?sort=desc&order_by=created_at'.format(self)))
 
-        return self._api.call(POST(notes_url, {'body': message}))
+    def comment(self, message):
+        self.refetch_notes()
+        last_note = next(iter(self._notes))
+
+        if last_note.get('body') != message:
+
+            if self._api.version().release >= (9, 2, 2):
+                notes_url = '/projects/{0.project_id}/merge_requests/{0.iid}/notes'.format(self)
+            else:
+                # GitLab botched the v4 api before 9.2.2
+                notes_url = '/projects/{0.project_id}/merge_requests/{0.id}/notes'.format(self)
+
+            return self._api.call(POST(notes_url, {'body': message}))
+
+        return True
 
     def rebase(self):
         self.refetch_info()
