@@ -6,14 +6,25 @@ all: dockerize
 .PHONY: bump
 bump: bump-requirements
 
+poetry.lock:
+	poetry install
+
+requirements.txt: poetry.lock
+	poetry export -o $@
+
+requirements_development.txt: poetry.lock
+	poetry export --dev -o $@
+
+.PHONY: bump-poetry-lock
+bump-poetry-lock:
+	poetry update
+
+.PHONY: clean-requirements
+clean-requirements:
+	rm -rf requirements.txt requirements_development.txt
+
 .PHONY: bump-requirements
-bump-requirements: clean requirements_frozen.txt
-
-requirements_frozen.txt: requirements.txt
-	pip freeze -r $^ > $@
-
-requirements_plus_development_frozen.txt: requirements_frozen.txt
-	pip freeze -r $^ -r requirements_development.txt > $@
+bump-requirements: bump-poetry-lock clean-requirements requirements.txt requirements_development.txt
 
 .PHONY: dockerize
 dockerize:

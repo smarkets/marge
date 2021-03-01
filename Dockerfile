@@ -1,3 +1,16 @@
+FROM python:3.9-slim AS builder
+
+ARG POETRY_VERSION=1.1.4
+RUN pip install poetry==$POETRY_VERSION
+
+WORKDIR /src
+
+COPY pyproject.toml poetry.lock README.md pylintrc ./
+COPY marge/ ./marge/
+RUN poetry export -o requirements.txt && \
+  poetry build
+
+
 FROM python:3.9-slim
 
 RUN apt-get update && apt-get install -y \
@@ -5,15 +18,9 @@ RUN apt-get update && apt-get install -y \
   && \
   rm -rf /var/lib/apt/lists/*
 
-WORKDIR /src
+COPY --from=builder /src/requirements.txt /src/dist/marge-*.tar.gz /tmp/
 
-ADD requirements_frozen.txt ./
-RUN pip install -r ./requirements_frozen.txt
+RUN pip install -r /tmp/requirements.txt && \
+  pip install /tmp/marge-*.tar.gz
 
-ADD version ./
-ADD setup.py ./
-ADD marge.app ./
-ADD marge/ ./marge/
-RUN python ./setup.py install
-
-ENTRYPOINT ["marge.app"]
+ENTRYPOINT ["marge"]

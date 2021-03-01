@@ -7,7 +7,7 @@ python:
   - "3.7"
   - "3.8"
   - "3.9"
-install: pip install -r requirements_plus_development_frozen.txt
+install: pip install -r requirements_development.txt
 script: pytest
 deploy:
   provider: script
