@@ -15,7 +15,7 @@ from . import trailerfilter
 # connects. The proper solution would be to pass in known_hosts as
 # a commandline parameter, but in practice few people will bother anyway and
 # in this case the threat of MiTM seems somewhat bogus.
-GIT_SSH_COMMAND = "ssh -o StrictHostKeyChecking=no "
+GIT_SSH_COMMAND = os.getenv("MARGEBOT_GIT_SSH_COMMAND", "ssh -o StrictHostKeyChecking=no ")
 
 
 def _filter_branch_script(trailer_name, trailer_values):
