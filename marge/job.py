@@ -50,10 +50,18 @@ class MergeJob:
 
         approvals = merge_request.fetch_approvals()
         if not approvals.sufficient:
-            raise CannotMerge(
-                'Insufficient approvals '
-                '(have: {0.approver_usernames} missing: {0.approvals_left})'.format(approvals)
-            )
+            message = ""
+            if not self._api.version().is_ee:
+                message = (
+                    'Insufficient approvals '
+                    '(have: {0.approver_usernames} missing: {0.approvals_left}). '
+                    'Please ask {0.approvers_string} to review').format(approvals)
+            else:
+                message = (
+                    'Insufficient approvals '
+                    '(have: {0.approver_usernames} missing: {0.approvals_left}). ').format(approvals)
+
+            raise CannotMerge(message)
 
         state = merge_request.state
         if state not in ('opened', 'reopened', 'locked'):
