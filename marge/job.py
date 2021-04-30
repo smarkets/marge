@@ -4,6 +4,7 @@ import logging as log
 import time
 from collections import namedtuple
 from datetime import datetime, timedelta
+import requests
 
 from . import git, gitlab
 from .branch import Branch
@@ -166,8 +167,19 @@ class MergeJob:
             commit_sha = merge_request.sha
 
         log.info('Waiting for CI to pass for MR !%s', merge_request.iid)
+
+        consecutive_errors = 0
         while datetime.utcnow() - time_0 < self._options.ci_timeout:
-            ci_status = self.get_mr_ci_status(merge_request, commit_sha=commit_sha)
+            try:
+                ci_status = self.get_mr_ci_status(merge_request, commit_sha=commit_sha)
+                consecutive_errors = 0
+            except (gitlab.InternalServerError, requests.exceptions.Timeout):
+                consecutive_errors += 1
+                if consecutive_errors > 5:
+                    raise
+                time.sleep(waiting_time_in_secs)
+                continue
+
             if ci_status == 'success':
                 log.info('CI for MR !%s passed', merge_request.iid)
                 return
