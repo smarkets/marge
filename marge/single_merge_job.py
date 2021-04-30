@@ -27,8 +27,11 @@ class SingleMergeJob(MergeJob):
             log.warning("Skipping MR !%s: %s", merge_request.info['iid'], err.reason)
         except CannotMerge as err:
             message = "I couldn't merge this branch: %s" % err.reason
+            if "'Branch cannot be merged'" in err.reason:
+                message += ", probably due to a race condition with a manual merge. I will try again later..."
+            else:
+                self.unassign_from_mr(merge_request)
             log.warning(message)
-            self.unassign_from_mr(merge_request)
             merge_request.comment(message)
         except git.GitError:
             log.exception('Unexpected Git error')
