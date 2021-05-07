@@ -1,32 +1,34 @@
 VERSION?=$$(git rev-parse --abbrev-ref HEAD)
 
 .PHONY: all
-all: requirements_frozen.txt requirements.nix requirements_override.nix marge-bot dockerize
-
-.PHONY: marge-bot
-marge-bot:
-	nix-build --keep-failed --attr marge-bot default.nix
-
-.PHONY: clean
-clean:
-	rm -rf .cache result result-* requirements_frozen.txt
+all: dockerize
 
 .PHONY: bump
-bump: bump-requirements bump-sources
+bump: bump-requirements
 
-.PHONY: bump-sources
-bump-sources:
-	nix-shell --run niv update
+poetry.lock:
+	poetry install
+
+requirements.txt: poetry.lock
+	poetry export -o $@
+
+requirements_development.txt: poetry.lock
+	poetry export --dev -o $@
+
+.PHONY: bump-poetry-lock
+bump-poetry-lock:
+	poetry update
+
+.PHONY: clean-requirements
+clean-requirements:
+	rm -rf requirements.txt requirements_development.txt
 
 .PHONY: bump-requirements
-bump-requirements: clean requirements_frozen.txt
-
-requirements_frozen.txt requirements.nix requirements_override.nix: requirements.txt
-	pypi2nix -V 3.6 -r $^
+bump-requirements: bump-poetry-lock clean-requirements requirements.txt requirements_development.txt
 
 .PHONY: dockerize
 dockerize:
-	docker load --input $$(nix-build --attr docker-image default.nix)
+	docker build --tag smarkets/marge-bot:$$(cat version) .
 
 .PHONY: docker-push
 docker-push:
