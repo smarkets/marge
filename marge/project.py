@@ -112,8 +112,10 @@ class Project(gitlab.Resource):
 @unique
 class AccessLevel(IntEnum):
     # See https://docs.gitlab.com/ce/api/access_requests.html
+    none = 0
+    minimal = 5
     guest = 10
     reporter = 20
     developer = 30
-    master = 40
+    maintainer = 40
     owner = 50

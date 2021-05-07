@@ -230,6 +230,11 @@ def _parse_config(args):
         action='store_true',
         help='Skip CI when updating individual MRs when using batches'
     )
+    parser.add_argument(
+        '--cli',
+        action='store_true',
+        help='Run marge-bot as a single CLI command, not a service'
+    )
     config = parser.parse_args(args)
 
     if config.use_merge_strategy and config.batch:
@@ -337,6 +342,7 @@ def main(args=None):
                 skip_ci_batches=options.skip_ci_batches,
             ),
             batch=options.batch,
+            cli=options.cli,
         )
 
         marge_bot = bot.Bot(api=api, config=config)

@@ -18,7 +18,7 @@ objects:
       MARGE_AUTH_TOKEN: "$(MARGE_AUTH_TOKEN)"
       MARGE_SSH_KEY: "$(MARGE_SSH_KEY)"
   - kind: Deployment
-    apiVersion: apps/v1beta1
+    apiVersion: apps/v1
     metadata:
       name: "$(APP_NAME)"
       namespace: "$(KUBE_NAMESPACE)"
@@ -26,6 +26,9 @@ objects:
         k8s-app: "$(APP_NAME)"
     spec:
       replicas: "$((REPLICA_COUNT))"
+      selector:
+        matchLabels:
+           k8s-app: "$(APP_NAME)"
       template:
         metadata:
           labels:

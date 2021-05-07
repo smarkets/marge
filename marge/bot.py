@@ -68,6 +68,9 @@ class Bot:
                 time_to_sleep_between_projects_in_secs,
                 projects,
             )
+            if self._config.cli:
+                return
+
             big_sleep = max(0,
                             min_time_to_sleep_after_iterating_all_projects_in_secs -
                             time_to_sleep_between_projects_in_secs * len(projects))
@@ -196,7 +199,7 @@ class Bot:
 
 class BotConfig(namedtuple('BotConfig',
                            'user use_https auth_token ssh_key_file project_regexp merge_order merge_opts ' +
-                           'git_timeout git_reference_repo branch_regexp source_branch_regexp batch')):
+                           'git_timeout git_reference_repo branch_regexp source_branch_regexp batch cli')):
     pass
 
 
