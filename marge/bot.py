@@ -32,13 +32,22 @@ class Bot:
 
     def start(self):
         with TemporaryDirectory() as root_dir:
-            repo_manager = store.RepoManager(
-                user=self.user,
-                root_dir=root_dir,
-                ssh_key_file=self._config.ssh_key_file,
-                timeout=self._config.git_timeout,
-                reference=self._config.git_reference_repo,
-            )
+            if self._config.use_https:
+                repo_manager = store.HttpsRepoManager(
+                    user=self.user,
+                    root_dir=root_dir,
+                    auth_token=self._config.auth_token,
+                    timeout=self._config.git_timeout,
+                    reference=self._config.git_reference_repo,
+                )
+            else:
+                repo_manager = store.SshRepoManager(
+                    user=self.user,
+                    root_dir=root_dir,
+                    ssh_key_file=self._config.ssh_key_file,
+                    timeout=self._config.git_timeout,
+                    reference=self._config.git_reference_repo,
+                )
             self._run(repo_manager)
 
     @property
@@ -189,8 +198,8 @@ class Bot:
 
 
 class BotConfig(namedtuple('BotConfig',
-                           'user ssh_key_file project_regexp merge_order merge_opts git_timeout ' +
-                           'git_reference_repo branch_regexp source_branch_regexp batch cli')):
+                           'user use_https auth_token ssh_key_file project_regexp merge_order merge_opts ' +
+                           'git_timeout git_reference_repo branch_regexp source_branch_regexp batch cli')):
     pass
 
 

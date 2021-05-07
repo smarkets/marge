@@ -72,6 +72,8 @@ optional arguments:
                            [env var: MARGE_AUTH_TOKEN_FILE] (default: None)
   --gitlab-url URL      Your GitLab instance, e.g. "https://gitlab.example.com".
                            [env var: MARGE_GITLAB_URL] (default: None)
+  --use-https           use HTTP(S) instead of SSH for GIT repository access
+                           [env var: MARGE_USE_HTTPS] (default: False)
   --ssh-key KEY         The private ssh key for marge so it can clone/push.
                         DISABLED because passing credentials on the command line is insecure:
                         You can still set it via ENV variable or config file, or use "--ssh-key-file" flag.
@@ -79,20 +81,21 @@ optional arguments:
   --ssh-key-file FILE   Path to the private ssh key for marge so it can clone/push.
                            [env var: MARGE_SSH_KEY_FILE] (default: None)
   --embargo INTERVAL[,..]
-                        Time(s) during which no merging is to take place, e.g. "Friday 1pm - Monday 9am"
-                           or "Fri 12:30 Europe/London - Mon 08:00 Europe/London"
+                        Time(s) during which no merging is to take place, e.g. "Friday 1pm - Monday 9am".
                            [env var: MARGE_EMBARGO] (default: None)
   --use-merge-strategy  Use git merge instead of git rebase to update the *source* branch (EXPERIMENTAL)
                         If you need to use a strict no-rebase workflow (in most cases
                         you don't want this, even if you configured gitlab to use merge requests
                         to use merge commits on the *target* branch (the default).)
                            [env var: MARGE_USE_MERGE_STRATEGY] (default: False)
+  --rebase-remotely     Instead of rebasing in a local clone of the repository, use GitLab's
+                        built-in rebase functionality, via their API. Note that Marge can't add
+                        information in the commits in this case.
+                           [env var: MARGE_REBASE_REMOTELY] (default: False)
   --add-tested          Add "Tested: marge-bot <$MR_URL>" for the final commit on branch after it passed CI.
                            [env var: MARGE_ADD_TESTED] (default: False)
   --batch               Enable processing MRs in batches
                            [env var: MARGE_BATCH] (default: False)
-  --use-no-ff-batches      Disable fast forwarding when merging MR batches.
-                           [env var: MARGE_USE_NO_FF_BATCHES] (default: False)
   --add-part-of         Add "Part-of: <$MR_URL>" to each commit in MR.
                            [env var: MARGE_ADD_PART_OF] (default: False)
   --add-reviewers       Add "Reviewed-by: $approver" for each approver of MR to each commit in MR.
@@ -100,10 +103,9 @@ optional arguments:
   --impersonate-approvers
                         Marge-bot pushes effectively don't change approval status.
                            [env var: MARGE_IMPERSONATE_APPROVERS] (default: False)
-  --merge-order         The order you want marge to merge its requests.
-                        As of earliest merge request creation time (created_at), update time (updated_at)
-                        or assigned to 'marge-bot' user time (assigned_at)
-                          [env var: MARGE_MERGE_ORDER] (default: created_at)
+  --merge-order {created_at,updated_at,assigned_at}
+                        Order marge merges assigned requests. created_at (default), updated_at or assigned_at.
+                           [env var: MARGE_MERGE_ORDER] (default: created_at)
   --approval-reset-timeout APPROVAL_RESET_TIMEOUT
                         How long to wait for approvals to reset after pushing.
                         Only useful with the "new commits remove all approvals" option in a project's settings.
@@ -136,6 +138,11 @@ optional arguments:
   --cli                 Run marge-bot as a single CLI command, not as a long-running service.
                         This may be used to run marge-bot in scheduled CI pipelines or cronjobs.
                            [env var: MARGE_CLI] (default: False)
+  --use-no-ff-batches   Disable fast forwarding when merging MR batches   [env var: MARGE_USE_NO_FF_BATCHES] (default: False)
+  --use-merge-commit-batches
+                        Use merge commit when creating batches, so that the commits in the batch MR will be the same with in individual MRs. Requires sudo scope in the access token.
+                           [env var: MARGE_USE_MERGE_COMMIT_BATCHES] (default: False)
+  --skip-ci-batches     Skip CI when updating individual MRs when using batches   [env var: MARGE_SKIP_CI_BATCHES] (default: False)
 ```
 Here is a config file example
 ```yaml
@@ -156,6 +163,8 @@ project-regexp: .*
 # choose one way of specifying the SSH key
 #ssh-key: KEY
 ssh-key-file: token.FILE
+# OR use HTTPS instead of SSH
+#use-https: true
 ```
 For more information about configuring marge-bot see `--help`
 
@@ -203,7 +212,7 @@ ssh-keygen -t ed25519 -C marge-bot@invalid -f marge-bot-ssh-key -P ''
 Add the public key (`marge-bot-ssh-key.pub`) to the user's `SSH Keys` in GitLab
 and keep the private one handy.
 
-### Running marge-bot in docker (what we do)
+### Running marge-bot in docker using SSH (what we do)
 
 Assuming you have already got docker installed, the quickest and most minimal
 way to run marge is like so (*but see note about passing secrets on the
@@ -255,6 +264,22 @@ may contain bugs.
 
 You can also specify a particular version as a tag, e.g.
 `smarkets/marge-bot:0.7.0`.
+
+### Running marge-bot in docker using HTTPS
+
+It is also possible to use Git over HTTPS instead of Git over SSH. To use HTTPS instead of SSH,
+add the `--use-https` flag and do not provide any SSH keys. Alternatively you can set the
+environment variable `MARGE_USE_HTTPS` or the config file property `use-https`.
+
+```bash
+docker run --restart=on-failure \ # restart if marge crashes because GitLab is flaky
+  -e MARGE_AUTH_TOKEN="$(cat marge-bot.token)" \
+  smarkets/marge-bot \
+  --use-https \
+  --gitlab-url='http://your.gitlab.instance.com'
+```
+
+HTTPS can be used using any other deployment technique as well.
 
 ### Running marge-bot in kubernetes
 It's also possible to run marge in kubernetes, e.g. here's how you use a ktmpl
